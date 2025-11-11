@@ -25,7 +25,7 @@ export async function POST(req) {
 
     // 🔹 Ambil user dari tabel Supabase
     const { data: users, error } = await supabase
-      .from("User")
+      .from("users")
       .select("*")
       .eq("email", email)
       .limit(1)

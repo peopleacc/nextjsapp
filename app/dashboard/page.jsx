@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabaseClient"
+import OrderRecent from "../components/orders";
+import TableUser from "../components/user";
 
 export default async function DashboardPage() {
   const { data: users, error } = await supabase.from("User").select("*")
@@ -10,13 +12,13 @@ export default async function DashboardPage() {
   if (!users?.length) return <div>Tidak ada data user.</div>
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Daftar User</h1>
-      <ul>
-        {users.map((u) => (
-          <li key={u.id}>{u.email}</li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <div className="flex grid grid-cols-2 gap-4 ">
+        <OrderRecent />
+        <TableUser />
+      </div>
+
+    </>
+
   )
 }

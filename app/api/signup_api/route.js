@@ -10,13 +10,15 @@ export async function POST(req) {
     const params = new URLSearchParams(body);
     const email = params.get("email");
     const password = params.get("password");
+    const Name = params.get("Name")
 
     console.log("📨 Data diterima dari Android:");
     console.log("   Email:", email);
     console.log("   Password:", password);
+    console.log("   Name:", Name);
 
     // 🔹 Validasi input
-    if (!email || !password) {
+    if (!email || !password || !Name) {
       return NextResponse.json(
         { status: "error", message: "Email dan password wajib diisi" },
         { status: 400 }
@@ -25,7 +27,7 @@ export async function POST(req) {
 
     // 🔹 Ambil ID terakhir dari tabel User (jika perlu manual)
     const { data: angka, error: errorSelect } = await supabase
-      .from("User")
+      .from("users")
       .select("id")
       .order("id", { ascending: false })
       .limit(1);
@@ -41,7 +43,7 @@ export async function POST(req) {
     // 🔹 Simpan data baru ke tabel Supabase
     const { data: users, error } = await supabase
       .from("User")
-      .insert([{ id: p_id, email: email, password: password }]); // jika id auto increment, hapus id
+      .insert([{ id: p_id, email: email, password: password, name: Name }]); // jika id auto increment, hapus id
 
     if (error) {
       console.error("❌ Supabase error:", error);
