@@ -1,5 +1,16 @@
 "use client";
 
+import { supabase } from "@/lib/supabaseClient"
+ const { data: users, error } = await supabase.from("pemesanan").select("*,users(*)")
+
+  console.log("Data dari Supabase:", users)
+  console.log("Error:", error)
+
+  if (error) return <div>Error: {error.message}</div>
+  if (!users?.length) return <div>Tidak ada data user.</div>
+
+
+
 export default function OrderRecent() {
     return(
         <>
@@ -13,7 +24,7 @@ export default function OrderRecent() {
               <span className="px-2 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full">
                 Order
               </span>
-              <span className="text-gray-500 text-sm">#IN-2025</span>
+              <span className="text-gray-500 text-sm">#INsss-2025</span>
             </div>
 
             <h3 className="text-gray-800 font-semibold">Join Premium</h3>

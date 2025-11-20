@@ -1,77 +1,123 @@
-import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabaseClient"
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
+import { randomUUID } from "crypto";
 
+// =======================
+// 🔹 LOGIN (POST)
+// =======================
 export async function POST(req) {
   try {
-    // 🔹 Baca isi body dari Android
-    const body = await req.text()
-    console.log("📩 Raw body dari Android:", body) // <--- log mentah dari Android
-
-    const params = new URLSearchParams(body)
-    const email = params.get("email")
-    const password = params.get("password")
-
-    console.log("📨 Data diterima dari Android:")
-    console.log("   Email:", email)
-    console.log("   Password:", password)
+    const { email, password } = await req.json();
 
     if (!email || !password) {
-      console.warn("⚠️ Email atau password kosong!")
       return NextResponse.json(
-        { status: "error", message: "Email dan password wajib diisi" },
+        { status: "error", message: "Email & password wajib diisi" },
         { status: 400 }
-      )
+      );
     }
 
-    // 🔹 Ambil user dari tabel Supabase
+    // 🔹 Cari user di Supabase
     const { data: users, error } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
-      .limit(1)
+      .limit(1);
 
-    if (error) {
-      console.error("❌ Supabase error:", error)
-      return NextResponse.json({ status: "error", message: "Gagal ambil data user" })
-    }
+    if (error || !users || users.length === 0)
+      return NextResponse.json({ status: "error", message: "User tidak ditemukan" });
 
-    console.log("📦 Data user ditemukan:", users)
+    const user = users[0];
 
-    if (!users || users.length === 0) {
-      console.warn("⚠️ Email tidak ditemukan di database.")
-      return NextResponse.json({ status: "error", message: "Email tidak ditemukan" })
-    }
+    // 🔹 Cek password (plaintext; ganti bcrypt di produksi)
+    if (user.password_hash !== password)
+      return NextResponse.json({ status: "error", message: "Password salah" });
 
-    const user = users[0]
+    // 🔹 Buat session token
+    const sessionToken = randomUUID();
 
-    // 🔹 Bandingkan password (plaintext)
-    if (user.password !== password) {
-      console.warn("❌ Password salah untuk user:", email)
-      return NextResponse.json({ status: "error", message: "Password salah" })
-    }
+    // 🔹 Simpan session
+    await supabase.from("sessions").insert({
+      user_id: user.id,
+      email: user.email,
+      token: sessionToken,
+      created_at: new Date().toISOString(),
+    });
 
-    console.log("✅ Login berhasil untuk user:", email)
-
-    // ✅ Kirim respon sukses
+    // 🔹 Response sukses
     return NextResponse.json({
       status: "success",
       message: "Login berhasil",
+      session: sessionToken,
       user: {
         id: user.id,
-        email: user.email,
         nama: user.nama,
+        email: user.email,
       },
-    })
+    });
   } catch (err) {
-    console.error("💥 API Error:", err)
+    console.error("💥 API Error:", err);
     return NextResponse.json(
       { status: "error", message: "Internal Server Error" },
       { status: 500 }
-    )
+    );
   }
 }
 
-export async function GET() {
-  console.log("📡 Endpoint /api/login diakses melalui GET")
-  return NextResponse.json({ message: "Login API aktif ✅" })
+// =======================
+// 🔹 GET SESSION (GET)
+// =======================
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get("token");
+
+    if (!token) {
+      return NextResponse.json(
+        { status: "error", message: "Token tidak diberikan" },
+        { status: 400 }
+      );
+    }
+
+    // 🔹 Cek session
+    const { data: session, error: sessionError } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("token", token)
+      .single();
+
+    if (sessionError || !session) {
+      return NextResponse.json({
+        status: "error",
+        message: "Session tidak valid",
+      });
+    }
+
+    // 🔹 Ambil data user
+    const { data: users, error: userError } = await supabase
+      .from("users")
+      .select("user_id, nama, email, no_hp, password_hash")
+      .eq("email", session.email)
+      .limit(1);
+
+    if (userError || !users || users.length === 0) {
+      return NextResponse.json({
+        status: "error",
+        message: "User tidak ditemukan",
+      });
+    }
+
+    const user = users[0];
+
+    return NextResponse.json({
+      status: "success",
+      message: "Session valid",
+      user,
+    });
+  } catch (err) {
+    console.error("💥 Session GET Error:", err);
+    return NextResponse.json({
+      status: "error",
+      message: "Internal Server Error",
+    });
+  }
 }

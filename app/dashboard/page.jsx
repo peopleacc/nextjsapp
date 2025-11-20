@@ -3,7 +3,7 @@ import OrderRecent from "../components/orders";
 import TableUser from "../components/user";
 
 export default async function DashboardPage() {
-  const { data: users, error } = await supabase.from("User").select("*")
+  const { data: users, error } = await supabase.from("users").select("*")
 
   console.log("Data dari Supabase:", users)
   console.log("Error:", error)
