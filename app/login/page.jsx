@@ -75,7 +75,6 @@ export default function LoginPage() {
     }
 
     return (
-    <div className="min-h-screen bg-[#2D2E71] flex items-center justify-center px-4">
         <form
             id="loginForm"
             onSubmit={handleSubmit}
@@ -156,7 +155,7 @@ export default function LoginPage() {
                 <p className="text-xs text-center text-gray-600">Sign in with another account</p>
             </div>
         </form>
-    </div>
+
 )
 
 }
