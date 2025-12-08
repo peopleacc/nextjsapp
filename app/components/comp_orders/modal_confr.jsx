@@ -36,6 +36,10 @@ export default function Modal_confr({ isOpen, onClose, order, onUpdated }) {
         updates.status_pengerjaan = 'selesai';
       }
 
+      // remove assigned technician (clear both possible column names)
+      // so after payment the order is no longer assigned
+      updates.teknisi_id = null;
+
       // If no known fields found, still attempt to set status_pengerjaan
       if (!Object.keys(updates).length) {
         updates.status_pengerjaan = 'selesai';

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ModalPen from "./modal_pen";
-import Modalcancel from "./modal_cancel";
+import ModalDelete from "./modal_delete";
 
 export default function OrdPen() {
   const [orders, setOrders] = useState([]);
@@ -122,11 +122,11 @@ export default function OrdPen() {
       />
 
       {/* Modal Cancel */}
-      <Modalcancel
+      <ModalDelete
         isOpen={!!selectedCancel}
         onClose={() => setSelectedCancel(null)}
         order={selectedCancel}
-        onUpdated={fetchOrders}   // 🔥 Bisa dipakai juga
+        onDeleted={() => fetchOrders()}   // refresh after deletion
       />
     </div>
   );

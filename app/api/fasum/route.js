@@ -2,95 +2,70 @@ export async function GET() {
   const data = [
     {
       id: 1,
-      name: "Taman Kota",
+      name: "Universitas Diponegoro",
       phone: "081234567890",
       address: {
-        street: "Jl. Merdeka No.1",
-        city: "Jakarta",
+        street: "Jl. Prof. Soedarto, Tembalang, Kec. Tembalang, Kota Semarang, Jawa Tengah 50275",
+        city: "Semarang",
         geo: {
-          lat: "-6.200000",
-          lng: "106.816666"
+          lat: "-7.051813425482647",
+          lng: "110.44095596829803"
         }
       }
     },
     {
       id: 2,
-      name: "Perpustakaan Umum",
+      name: "Institute Teknologi Indonesia",
       phone: "081987654321",
       address: {
-        street: "Jl. Sudirman No.8",
+        street: "Jl. Tamansari No.73, Lb. Siliwangi, Kecamatan Coblong, Kota Bandung, Jawa Barat 40132",
         city: "Bandung",
         geo: {
-          lat: "-6.914744",
-          lng: "107.609810"
+          lat: "-6.88595748927564",
+          lng: "107.60843962814887"
         }
       }
     },
     {
       id: 3,
-      name: "Rumah Sakit Sehat Sentosa",
+      name: "Universitas Negeri indonesia",
       phone: "082112223334",
       address: {
-        street: "Jl. Diponegoro No.5",
-        city: "Surabaya",
+        street: "Jl. Lingkar, Pondok Cina, Kecamatan Beji, Kota Depok, Jawa Barat 16424",
+        city: "Depok",
         geo: {
-          lat: "-7.250445",
-          lng: "112.768845"
+          lat: "-6.360526928489944",
+          lng: "106.82723429553113"
         }
       }
     },
     {
       id: 4,
-      name: "Pusat Kebugaran Nasional",
+      name: "Universitas Padjajaran",
       phone: "081355667788",
       address: {
-        street: "Jl. Adi Sucipto No.21",
+        street: "Jl. Raya Bandung Sumedang KM.21, Hegarmanah, Kec. Jatinangor, Kabupaten Sumedang, Jawa Barat 45363",
         city: "Yogyakarta",
         geo: {
-          lat: "-7.795580",
-          lng: "110.369490"
+          lat: "-6.9134344601077355",
+          lng: "107.77491462121623"
         }
       }
     },
     {
       id: 5,
-      name: "Museum Budaya Nusantara",
+      name: "Universitas Gadjah Mada",
       phone: "081400200300",
       address: {
         street: "Jl. Gajah Mada No.12",
         city: "Semarang",
         geo: {
-          lat: "-6.966667",
-          lng: "110.416664"
-        }
-      }
-    },
-    {
-      id: 6,
-      name: "Lapangan Serbaguna",
-      phone: "082122223333",
-      address: {
-        street: "Jl. Pahlawan No.9",
-        city: "Medan",
-        geo: {
-          lat: "3.595196",
-          lng: "98.672226"
-        }
-      }
-    },
-    {
-      id: 7,
-      name: "Taman Bunga Serayu",
-      phone: "085355566677",
-      address: {
-        street: "Jl. Veteran No.3",
-        city: "Banjarmasin",
-        geo: {
-          lat: "-3.318606",
-          lng: "114.592445"
+          lat: "-7.7706903072523765",
+          lng: "110.37786929529192"
         }
       }
     }
+    
   ];
 
   return Response.json(data);
