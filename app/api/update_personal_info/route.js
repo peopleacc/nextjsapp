@@ -20,7 +20,7 @@ export async function GET(req) {
     // 🔹 Ambil data user dari Supabase berdasarkan token/session
     const { data: user, error } = await supabase
       .from("m_customers")
-      .select("id, name, email, no_hp, address")
+      .select("id_user, name, email, no_hp, address")
       .eq("email", email)  // Sesuaikan dengan nama kolom token di database
       .single();
 
@@ -96,7 +96,7 @@ export async function POST(req) {
     // 🔹 Verifikasi token dan ambil user
     const { data: existingUser, error: verifyError } = await supabase
       .from("m_customers")
-      .select("id, email")
+      .select("id_user, email")
       .eq("email", email)  // Sesuaikan dengan nama kolom token
       .single();
 
@@ -117,7 +117,7 @@ export async function POST(req) {
         address: address || null
       })
       .eq("email", email)
-      .select("id, name, email, no_hp, address")  // 🔹 Select no_hp dari database
+      .select("id_user, name, email, no_hp, address")  // 🔹 Select no_hp dari database
       .single();
 
     if (error) {
