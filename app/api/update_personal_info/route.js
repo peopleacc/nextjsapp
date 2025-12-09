@@ -62,9 +62,10 @@ export async function POST(req) {
     const body = await req.json();
     console.log("📩 Raw body dari Android:", body);
 
-    const { nama, email, phone, address } = body;
+    const { token, nama, email, phone, address } = body;
 
     console.log("📨 Data diterima dari Android:");
+    console.log("   token:", token);
     console.log("   Nama:", nama);
     console.log("   Email:", email);
     console.log("   Phone:", phone);
@@ -83,7 +84,7 @@ export async function POST(req) {
       .from("users")
       .update({
         name: nama,
-        phone: phone,
+        no_hp: phone,
         address: address || null
       })
       .eq("email", email)
@@ -108,7 +109,7 @@ export async function POST(req) {
         id: updatedUser.id,
         nama: updatedUser.name,
         email: updatedUser.email,
-        phone: updatedUser.phone,
+        no_hp: updatedUser.no_hp,
         address: updatedUser.address || null,
       },
     });
