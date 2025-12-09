@@ -20,7 +20,7 @@ export async function GET(req) {
     // 🔹 Ambil data user dari Supabase berdasarkan token/session
     const { data: user, error } = await supabase
       .from("m_customers")
-      .select("user_id, name, email, no_hp, address")
+      .select("id_user, nama, email, no_hp, address")
       .eq("email", email)  // Sesuaikan dengan nama kolom token di database
       .single();
 
@@ -40,7 +40,7 @@ export async function GET(req) {
       message: "Data user berhasil diambil",
       user: {
         id: user.id,
-        nama: user.name,
+        nama: user.nama,
         email: user.email,
         phone: user.no_hp,  // 🔹 Ubah ke 'phone' untuk Android
         address: user.address || null,
@@ -96,7 +96,7 @@ export async function POST(req) {
     // 🔹 Verifikasi token dan ambil user
     const { data: existingUser, error: verifyError } = await supabase
       .from("m_customers")
-      .select("user_id, email")
+      .select("id_user, email")
       .eq("email", email)  // Sesuaikan dengan nama kolom token
       .single();
 
@@ -112,12 +112,12 @@ export async function POST(req) {
     const { data: updatedUser, error } = await supabase
       .from("m_customers")
       .update({
-        name: nama,
+        nama: nama,
         no_hp: phone,  // 🔹 Kolom database adalah no_hp
         address: address || null
       })
       .eq("email", email)
-      .select("user_id, name, email, no_hp, address")  // 🔹 Select no_hp dari database
+      .select("id_user, nama, email, no_hp, address")  // 🔹 Select no_hp dari database
       .single();
 
     if (error) {
@@ -136,7 +136,7 @@ export async function POST(req) {
       message: "Data user berhasil diupdate",
       user: {
         id: updatedUser.id,
-        nama: updatedUser.name,
+        nama: updatedUser.nama,
         email: updatedUser.email,
         phone: updatedUser.no_hp,  // 🔹 Ubah ke 'phone' untuk Android
         address: updatedUser.address || null,
