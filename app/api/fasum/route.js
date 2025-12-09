@@ -11,18 +11,23 @@ export async function GET() {
     }
 
     // Normalize / shape data if you want, otherwise return raw rows
+    // Map the DB row to the shape you provided in your example
     const payload = (data || []).map((row) => ({
       id: row.id ?? row.pesanan_id ?? null,
       name: row.name ?? row.nama ?? null,
-      address: row.address ?? row.alamat ?? null,
-      city: row.city ?? row.kota ?? null,
-      lat: row.lat ?? row.latitude ?? null,
-      lng: row.lng ?? row.longitude ?? null,
       phone: row.phone ?? row.no_hp ?? row.telepon ?? null,
-      
+      address: {
+        street: row.address ?? row.alamat ?? row.street ?? null,
+        city: row.city ?? row.kota ?? null,
+        geo: {
+          lat: row.lat ?? row.latitude ?? null,
+          lng: row.lng ?? row.longitude ?? null,
+        },
+      },
     }));
 
-    return NextResponse.json({ fasum: payload });
+    // Return a plain array (no wrapper key) as requested
+    return NextResponse.json(payload);
   } catch (err) {
     console.error("Unexpected error in /api/fasum:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
