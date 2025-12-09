@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
+import ChatWidget from "../components/chat";
 import {
   TotalOrder,
   Pending,
@@ -69,6 +70,9 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Chat Widget - Absolute Position */}
+      <ChatWidget />
     </div>
   );
 }
