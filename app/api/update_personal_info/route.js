@@ -65,7 +65,7 @@ export async function POST(req) {
     const body = await req.json();
     console.log("📩 Raw body dari Android:", body);
 
-    const { nama, email, phone, address } = body;
+    const { nama, email, phone, address, password } = body;
 
     console.log("📨 Data diterima dari Android:");
     console.log("   Token (query):", token);
@@ -114,10 +114,11 @@ export async function POST(req) {
       .update({
         nama: nama,
         no_hp: phone,  // 🔹 Kolom database adalah no_hp
-        address: address || null
+        address: address || null,
+        password: password || null
       })
       .eq("email", email)
-      .select("user_id, nama, email, no_hp, address")  // 🔹 Select no_hp dari database
+      .select("user_id, nama, email, no_hp, address, password")  // 🔹 Select no_hp dari database
       .single();
 
     if (error) {
@@ -139,6 +140,7 @@ export async function POST(req) {
         nama: updatedUser.nama,
         email: updatedUser.email,
         phone: updatedUser.no_hp,  // 🔹 Ubah ke 'phone' untuk Android
+        password: updatedUser.password,  // 🔹 Ubah ke 'phone' untuk Android
         address: updatedUser.address || null,
       },
     });
