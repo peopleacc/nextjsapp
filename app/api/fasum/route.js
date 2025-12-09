@@ -21,7 +21,7 @@ export async function GET() {
         city: row.city ?? row.kota ?? null,
         geo: {
           lat: row.lat ?? row.latitude ?? null,
-          lng: row.lng ?? row.longitude ?? null,
+          lng: row.ing ?? row.longitude ?? null,
         },
       },
     }));
