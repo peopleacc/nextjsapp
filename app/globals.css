@@ -23,7 +23,7 @@ body {
 }
 
 .bg-image-css{
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("/image/Logo.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("/image/logo.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
