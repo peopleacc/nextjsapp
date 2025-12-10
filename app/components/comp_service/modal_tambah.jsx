@@ -11,8 +11,7 @@ export default function Modal_tambah({ isOpen, onClose, onUpdated }) {
     const [nama, setNama] = useState("");
     const [harga, setHarga] = useState("");
     const [deskripsi, setDeskripsi] = useState("");
-    const [jenisKategori, setJenisKategori] = useState("");
-    const [tipeKendaraan, setTipeKendaraan] = useState("");
+
 
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -77,8 +76,6 @@ export default function Modal_tambah({ isOpen, onClose, onUpdated }) {
                     {
                         nama_layanan: nama,
                         deskripsi: deskripsi,
-                        jenis_kategori: jenisKategori,
-                        tipe_kendaraan_cocok: tipeKendaraan,
                         harga: harga,
                         gambar_url: imageUrl,
                     },
@@ -155,21 +152,6 @@ export default function Modal_tambah({ isOpen, onClose, onUpdated }) {
                     onChange={(e) => setDeskripsi(e.target.value)}
                 />
 
-                <input
-                    type="text"
-                    placeholder="Jenis Kategori"
-                    className="border w-full p-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={jenisKategori}
-                    onChange={(e) => setJenisKategori(e.target.value)}
-                />
-
-                <input
-                    type="text"
-                    placeholder="Tipe Kendaraan"
-                    className="border w-full p-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={tipeKendaraan}
-                    onChange={(e) => setTipeKendaraan(e.target.value)}
-                />
 
                 <input
                     type="number"
