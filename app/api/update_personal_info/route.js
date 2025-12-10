@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 
-// 🔹 GET - Ambil data personal information berdasarkan EMAIL
+// 🔹 GET - Ambil data personal information berdasarkan TOKEN
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
+    const token = searchParams.get("token");
 
-    console.log("📩 GET Personal Info - Email:", email);
+    console.log("📩 GET Personal Info - Token:", token);
 
     // 🔹 Validasi input
-    if (!email) {
+    if (!token) {
       return NextResponse.json(
-        { status: "error", message: "Email wajib diisi", user: null },
+        { status: "error", message: "Token wajib diisi", user: null },
         { status: 400 }
       );
     }
 
-    // 🔹 Ambil data user dari Supabase berdasarkan email
+    // 🔹 Ambil data user dari Supabase berdasarkan token/session
     const { data: user, error } = await supabase
-      .from("users")
-      .select("id, name, email, phone, address")
-      .eq("email", email)
+      .from("m_customers")
+      .select("user_id, nama, email, no_hp, address")
+      .eq("email", email)  // Sesuaikan dengan nama kolom token di database
       .single();
 
     if (error) {
@@ -34,15 +34,15 @@ export async function GET(req) {
 
     console.log("✅ User ditemukan:", user);
 
-    // ✅ Kirim response sukses
+    // ✅ Kirim response sukses (sesuai dengan UserData model Android)
     return NextResponse.json({
       status: "success",
       message: "Data user berhasil diambil",
       user: {
         id: user.id,
-        nama: user.name,
+        nama: user.nama,
         email: user.email,
-        phone: user.phone,
+        phone: user.no_hp,  // 🔹 Ubah ke 'phone' untuk Android
         address: user.address || null,
       },
     });
@@ -55,23 +55,37 @@ export async function GET(req) {
   }
 }
 
-// 🔹 POST - Update personal information berdasarkan EMAIL
+// 🔹 POST - Update personal information berdasarkan TOKEN
 export async function POST(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get("token");  // 🔹 Token dari query parameter
+
     // 🔹 Baca body JSON dari Android
     const body = await req.json();
     console.log("📩 Raw body dari Android:", body);
 
-    const { token, nama, email, phone, address } = body;
+    const { nama, email, phone, address, password } = body;
 
     console.log("📨 Data diterima dari Android:");
-    console.log("   token:", token);
+    console.log("   Token (query):", token);
+    console.log("   Token (body):", body.token);
     console.log("   Nama:", nama);
     console.log("   Email:", email);
     console.log("   Phone:", phone);
     console.log("   Address:", address);
 
-    // 🔹 Validasi input (email dan nama wajib)
+    // 🔹 Validasi token
+    if (!token && !body.token) {
+      return NextResponse.json(
+        { status: "error", message: "Token tidak ditemukan", user: null },
+        { status: 401 }
+      );
+    }
+
+    const authToken = token || body.token;
+
+    // 🔹 Validasi input (nama, email, phone wajib)
     if (!email || !nama || !phone) {
       return NextResponse.json(
         { status: "error", message: "Nama, email, dan phone wajib diisi", user: null },
@@ -79,16 +93,32 @@ export async function POST(req) {
       );
     }
 
+    // 🔹 Verifikasi token dan ambil user
+    const { data: existingUser, error: verifyError } = await supabase
+      .from("m_customers")
+      .select("user_id, email")
+      .eq("email", email)  // Sesuaikan dengan nama kolom token
+      .single();
+
+    if (verifyError || !existingUser) {
+      console.error("❌ Token invalid:", verifyError);
+      return NextResponse.json(
+        { status: "error", message: "Token tidak valid", user: null },
+        { status: 401 }
+      );
+    }
+
     // 🔹 Update data user ke Supabase berdasarkan email
     const { data: updatedUser, error } = await supabase
-      .from("users")
+      .from("m_customers")
       .update({
-        name: nama,
-        no_hp: phone,
-        address: address || null
+        nama: nama,
+        no_hp: phone,  // 🔹 Kolom database adalah no_hp
+        address: address || null,
+        password: password || null
       })
       .eq("email", email)
-      .select("id, name, email, phone, address")
+      .select("user_id, nama, email, no_hp, address, password")  // 🔹 Select no_hp dari database
       .single();
 
     if (error) {
@@ -101,15 +131,16 @@ export async function POST(req) {
 
     console.log("✅ Update berhasil:", updatedUser);
 
-    // ✅ Kirim response sukses
+    // ✅ Kirim response sukses (sesuai dengan UpdatePersonalInfoResponse Android)
     return NextResponse.json({
       status: "success",
       message: "Data user berhasil diupdate",
       user: {
         id: updatedUser.id,
-        nama: updatedUser.name,
+        nama: updatedUser.nama,
         email: updatedUser.email,
-        no_hp: updatedUser.no_hp,
+        phone: updatedUser.no_hp,  // 🔹 Ubah ke 'phone' untuk Android
+        password: updatedUser.password,  // 🔹 Ubah ke 'phone' untuk Android
         address: updatedUser.address || null,
       },
     });
