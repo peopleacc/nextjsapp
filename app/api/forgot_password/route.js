@@ -75,12 +75,13 @@ export default async function handler(req, res) {
                 })
             }
 
-            // Send email
-            await transporter.sendMail({
-                from: `"ULTIMO" <${process.env.EMAIL_USER}>`,
-                to: email,
-                subject: 'Kode OTP Reset Password - ULTIMO',
-                html: `
+            // Send email dengan logging jika gagal
+            try {
+                const emailResult = await transporter.sendMail({
+                    from: `"ULTIMO" <${process.env.EMAIL_USER}>`,
+                    to: email,
+                    subject: 'Kode OTP Reset Password - ULTIMO',
+                    html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #0D1282, #7886C7); padding: 30px; text-align: center;">
               <h1 style="color: white; margin: 0;">ULTIMO</h1>
@@ -98,12 +99,28 @@ export default async function handler(req, res) {
             </div>
           </div>
         `
-            })
+                })
 
-            return res.status(200).json({
-                status: 'success',
-                message: 'OTP telah dikirim ke email Anda'
-            })
+                console.log('Email berhasil dikirim ke:', email)
+                console.log('Message ID:', emailResult.messageId)
+
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'OTP telah dikirim ke email Anda'
+                })
+            } catch (emailError) {
+                console.error('=== GAGAL MENGIRIM EMAIL ===')
+                console.error('Email tujuan:', email)
+                console.error('Waktu:', new Date().toISOString())
+                console.error('Error message:', emailError.message)
+                console.error('Error code:', emailError.code)
+                console.error('Full error:', emailError)
+
+                return res.status(500).json({
+                    status: 'error',
+                    message: 'Gagal mengirim email OTP. Silakan coba lagi nanti.'
+                })
+            }
         }
 
         // ========== ACTION 2: VERIFY OTP ==========
