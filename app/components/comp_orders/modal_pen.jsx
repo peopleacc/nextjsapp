@@ -66,14 +66,21 @@ export default function Modalcancel({ isOpen, onClose, order, onUpdated }) {
 
   // ⬇️ Tombol PROSES
   const ProsesPesanan = async () => {
+    // Validasi: Pastikan teknisi sudah dipilih
+    if (!Teknisi || Teknisi === "") {
+      setErrorMsg("Harap pilih teknisi terlebih dahulu!");
+      return;
+    }
+
     try {
       setLoading(true);
+      setErrorMsg(""); // Clear previous error
 
       const { error } = await supabase
         .from("t_pemesanan")
         .update({
           status_pengerjaan: "proses",
-          teknisi_id: Teknisi,
+          teknisi_id: parseInt(Teknisi), // Convert to integer
         })
         .eq("pesanan_id", order.pesanan_id);
 
@@ -98,12 +105,12 @@ export default function Modalcancel({ isOpen, onClose, order, onUpdated }) {
         console.warn("Error inserting initial progress:", e);
       }
 
-        // generate work order PDF and try to upload / download
-        try {
-          await generateWorkOrderPDF(order);
-        } catch (e) {
-          console.warn('generateWorkOrderPDF error:', e);
-        }
+      // generate work order PDF and try to upload / download
+      try {
+        await generateWorkOrderPDF(order);
+      } catch (e) {
+        console.warn('generateWorkOrderPDF error:', e);
+      }
 
       alert(`Pesanan #${order.pesanan_id} berhasil diproses.`);
       onClose();
@@ -147,79 +154,73 @@ export default function Modalcancel({ isOpen, onClose, order, onUpdated }) {
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
-      className="bg-white p-6 rounded-xl shadow-xl max-w-lg w-full mx-auto mt-20 outline-none"
-      overlayClassName="fixed inset-0 bg-black/50 flex items-start justify-center z-50"
+      className="bg-white p-6 rounded-xl shadow-xl max-w-lg w-full mx-auto outline-none"
+      overlayClassName="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
     >
-      <h2 className="text-xl font-semibold mb-3">
-        Detail Pesanan #{order.pesanan_id}
+      <h2 className="text-xl font-semibold mb-4">
+        <i className="bi bi-inbox-fill text-blue-500 mr-2"></i>
+        Order Details #{order.pesanan_id}
       </h2>
 
-      <div className="space-y-2 text-sm">
-        <p><b>Nama:</b> {order.m_customers?.nama || "-"}</p>
-        <p><b>Layanan:</b> {order.m_product_layanan?.nama_layanan || "-"}</p>
-        <p><b>Deskripsi:</b> {order.m_product_layanan?.deskripsi || "-"}</p>
-        <p><b>Bahan:</b> {order.m_bahan?.nama_bahan || "-"}</p>
+      <div className="space-y-4">
+        {/* Order Info */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2 text-sm">
+          <p><b className="text-gray-600">Customer:</b> <span className="text-gray-800">{order.m_customers?.nama || "-"}</span></p>
+          <p><b className="text-gray-600">Service:</b> <span className="text-gray-800">{order.m_product_layanan?.nama_layanan || "-"}</span></p>
+          <p><b className="text-gray-600">Description:</b> <span className="text-gray-800">{order.m_product_layanan?.deskripsi || "-"}</span></p>
+          <p><b className="text-gray-600">Material:</b> <span className="text-gray-800">{order.m_bahan?.nama_bahan || "-"}</span></p>
+        </div>
 
         {errorMsg && (
-          <p className="text-red-600 text-sm">Error: {errorMsg}</p>
+          <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">⚠️ {errorMsg}</p>
         )}
 
-        {/* Dropdown Teknisi */}
-        <label className="text-sm font-semibold">Pilih Teknisi</label>
-        <select
-          className="
-            w-full px-3 py-2 border border-gray-300 rounded-lg
-            focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            bg-gray-50 cursor-pointer
-          "
-          value={Teknisi}
-          onChange={(e) => setTeknisi(e.target.value)}
-        >
-          <option value="" disabled className="text-gray-400">
-            -- Pilih Teknisi --
-          </option>
-
-          {listTeknisi.map((t) => (
-            <option
-              key={t.teknisi_id}
-              value={t.teknisi_id}
-              className="py-2 bg-white text-black hover:bg-blue-100"
-            >
-              {t.nama}
+        {/* Technician Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Technician <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer"
+            value={Teknisi}
+            onChange={(e) => setTeknisi(e.target.value)}
+          >
+            <option value="" disabled className="text-gray-400">
+              -- Select Technician --
             </option>
-          ))}
-        </select>
+            {listTeknisi.map((t) => (
+              <option key={t.teknisi_id} value={t.teknisi_id}>
+                {t.nama}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-6">
+      <div className="flex justify-end gap-3 pt-6">
         <button
-          className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+          type="button"
+          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
           onClick={onClose}
           disabled={loading}
         >
-          Tutup
+          Cancel
         </button>
 
         <button
-          className="
-            px-4 py-2 bg-gray-700 text-white rounded-md
-            hover:bg-gray-800
-          "
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
           onClick={TungguPesanan}
           disabled={loading}
         >
-          {loading ? "Memproses..." : "Tunggu Pesanan"}
+          {loading ? "Processing..." : "Set to Waiting"}
         </button>
 
         <button
-          className="
-            px-4 py-2 bg-green-600 text-white rounded-md
-            hover:bg-green-700
-          "
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition"
           onClick={ProsesPesanan}
           disabled={loading}
         >
-          {loading ? "Memproses..." : "Proses Pesanan"}
+          {loading ? "Processing..." : "Start Processing"}
         </button>
       </div>
     </Modal>

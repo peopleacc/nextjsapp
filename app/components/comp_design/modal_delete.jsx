@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 Modal.setAppElement("body");
 
-export default function ModalHapus({ isOpen, onClose, order, onUpdated }) {
+export default function ModalDeleteDesign({ isOpen, onClose, design, onDeleted }) {
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -16,15 +16,15 @@ export default function ModalHapus({ isOpen, onClose, order, onUpdated }) {
             setErrorMsg("");
 
             const { error } = await supabase
-                .from("m_product_layanan")
+                .from("m_bahan")
                 .delete()
-                .eq("product_id", order.product_id);
+                .eq("bahan_id", design.bahan_id);
 
             if (error) throw error;
 
-            alert(`Service "${order.nama_layanan}" deleted successfully!`);
+            alert(`Material "${design.nama_bahan}" deleted successfully!`);
             onClose();
-            if (onUpdated) onUpdated();
+            if (onDeleted) onDeleted();
         } catch (err) {
             setErrorMsg(err.message);
         } finally {
@@ -32,7 +32,7 @@ export default function ModalHapus({ isOpen, onClose, order, onUpdated }) {
         }
     };
 
-    if (!order) return null;
+    if (!design) return null;
 
     return (
         <Modal
@@ -46,10 +46,10 @@ export default function ModalHapus({ isOpen, onClose, order, onUpdated }) {
                     <i className="bi bi-trash3 text-red-500 text-3xl"></i>
                 </div>
 
-                <h2 className="text-xl font-semibold mb-2">Delete Service</h2>
+                <h2 className="text-xl font-semibold mb-2">Delete Material</h2>
 
                 <p className="text-gray-600 mb-4">
-                    Are you sure you want to delete the service <strong>"{order.nama_layanan}"</strong>?
+                    Are you sure you want to delete the material <strong>"{design.nama_bahan}"</strong>?
                 </p>
 
                 <p className="text-sm text-gray-500 mb-4">

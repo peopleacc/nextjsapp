@@ -10,7 +10,7 @@ const currency = new Intl.NumberFormat("id-ID", {
   minimumFractionDigits: 0,
 });
 
-const monthFormatter = new Intl.DateTimeFormat("id-ID", {
+const monthFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
 });
 
@@ -45,7 +45,7 @@ function buildMonthlyTrend(orders = []) {
 
 function buildStatusBreakdown(orders = []) {
   const statusMap = orders.reduce((acc, order) => {
-    const label = order?.status_pengerjaan?.trim() || "Tidak diketahui";
+    const label = order?.status_pengerjaan?.trim() || "Unknown";
     acc[label] = (acc[label] || 0) + 1;
     return acc;
   }, {});
@@ -65,7 +65,7 @@ export default async function ReportPage() {
   if (error) {
     return (
       <div className="glass-panel p-6 text-red-600">
-        Gagal memuat laporan: {error.message}
+        Failed to load report: {error.message}
       </div>
     );
   }
@@ -93,119 +93,132 @@ export default async function ReportPage() {
     .slice(0, 5);
 
   return (
-    <section className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <SummaryCard label="Total Pendapatan" value={currency.format(totalRevenue)} />
-        <SummaryCard label="Total Order" value={totalOrders} />
-        <SummaryCard label="Completion Rate" value={`${completionRate}%`} />
-        <SummaryCard label="Average Ticket" value={currency.format(avgTicket)} />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="glass-panel p-6 xl:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
-                Tren
-              </p>
-              <h2 className="text-2xl font-semibold text-[#2D336B]">
-                Pendapatan 6 Bulan Terakhir
-              </h2>
-            </div>
-          </div>
-          {monthlyTrend.data.length ? (
-            <RevenueTrendChart {...monthlyTrend} />
-          ) : (
-            <EmptyState message="Belum ada data pendapatan" />
-          )}
-        </div>
-
-        <div className="glass-panel p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
-                Status
-              </p>
-              <h2 className="text-2xl font-semibold text-[#2D336B]">
-                Distribusi Order
-              </h2>
-            </div>
-          </div>
-          {statusBreakdown.data.length ? (
-            <StatusDonutChart {...statusBreakdown} />
-          ) : (
-            <EmptyState message="Belum ada order tercatat" />
-          )}
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 14rem)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Report & Analytics</h2>
+          <p className="text-sm text-gray-600">View detailed business reports</p>
         </div>
       </div>
 
-      <div className="glass-panel p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
-              Aktivitas
-            </p>
-            <h2 className="text-2xl font-semibold text-[#2D336B]">
-              Order Terbaru
-            </h2>
+      {/* Scrollable Content */}
+      <div className="overflow-y-auto p-4" style={{ height: 'calc(100% - 80px)' }}>
+        <section className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <SummaryCard label="Total Revenue" value={currency.format(totalRevenue)} />
+            <SummaryCard label="Total Order" value={totalOrders} />
+            <SummaryCard label="Completion Rate" value={`${completionRate}%`} />
+            <SummaryCard label="Average Ticket" value={currency.format(avgTicket)} />
           </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#2D336B]/10">
-            <thead>
-              <tr>
-                {["ID", "Tanggal", "Status", "Total"].map((head) => (
-                  <th
-                    key={head}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#2D336B]/70"
-                  >
-                    {head}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#2D336B]/10">
-              {recentOrders.length ? (
-                recentOrders.map((order) => (
-                  <tr key={order.pesanan_id}>
-                    <td className="px-4 py-3 font-semibold text-[#2D336B]">
-                      #{order.pesanan_id}
-                    </td>
-                    <td className="px-4 py-3 text-[#2D336B]/80">
-                      {order.create_at
-                        ? new Date(order.create_at).toLocaleDateString("id-ID", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="accent-chip bg-[#FFF2F2] text-[#2D336B]">
-                        {order.status_pengerjaan || "Tidak diketahui"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-[#2D336B]">
-                      {currency.format(Number(order.total_estimasi_harga) || 0)}
-                    </td>
-                  </tr>
-                ))
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="glass-panel p-6 xl:col-span-2">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
+                    Trend
+                  </p>
+                  <h2 className="text-2xl font-semibold text-[#2D336B]">
+                    Revenue Last 6 Months
+                  </h2>
+                </div>
+              </div>
+              {monthlyTrend.data.length ? (
+                <RevenueTrendChart {...monthlyTrend} />
               ) : (
-                <tr>
-                  <td
-                    className="px-4 py-6 text-center text-[#2D336B]/60"
-                    colSpan={4}
-                  >
-                    Belum ada order terbaru.
-                  </td>
-                </tr>
+                <EmptyState message="No revenue data yet" />
               )}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            <div className="glass-panel p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
+                    Status
+                  </p>
+                  <h2 className="text-2xl font-semibold text-[#2D336B]">
+                    Order Distribution
+                  </h2>
+                </div>
+              </div>
+              {statusBreakdown.data.length ? (
+                <StatusDonutChart {...statusBreakdown} />
+              ) : (
+                <EmptyState message="No orders recorded yet" />
+              )}
+            </div>
+          </div>
+
+          <div className="glass-panel p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.3em] text-[#2D336B]/60">
+                  Activity
+                </p>
+                <h2 className="text-2xl font-semibold text-[#2D336B]">
+                  Recent Orders
+                </h2>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-[#2D336B]/10">
+                <thead>
+                  <tr>
+                    {["ID", "Date", "Status", "Total"].map((head) => (
+                      <th
+                        key={head}
+                        className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#2D336B]/70"
+                      >
+                        {head}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2D336B]/10">
+                  {recentOrders.length ? (
+                    recentOrders.map((order) => (
+                      <tr key={order.pesanan_id}>
+                        <td className="px-4 py-3 font-semibold text-[#2D336B]">
+                          #{order.pesanan_id}
+                        </td>
+                        <td className="px-4 py-3 text-[#2D336B]/80">
+                          {order.create_at
+                            ? new Date(order.create_at).toLocaleDateString("id-ID", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="accent-chip bg-[#FFF2F2] text-[#2D336B]">
+                            {order.status_pengerjaan || "Unknown"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-[#2D336B]">
+                          {currency.format(Number(order.total_estimasi_harga) || 0)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        className="px-4 py-6 text-center text-[#2D336B]/60"
+                        colSpan={4}
+                      >
+                        No recent orders.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
   );
 }
 

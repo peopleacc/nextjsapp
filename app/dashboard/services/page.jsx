@@ -1,38 +1,44 @@
 "use client";
 
+import { useState } from "react";
 import Card_serv from "../../components/comp_service/card_serv";
 import Modal_tambah from "../../components/comp_service/modal_tambah";
-import { useState } from "react";
 
 export default function ServicesPage() {
   const [isTambahOpen, setIsTambahOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // jika kamu ingin refresh list setelah insert
-  const fetchOrders = () => {
-    console.log("Refresh data...");
-    // TODO: isi fungsi fetch data
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
-    <div>
-      <div className="flex">
-        <h1 className="text-2xl mt-2 font-bold mb-4">Services</h1>
-
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 14rem)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Service List</h2>
+          <p className="text-sm text-gray-600">Manage available services</p>
+        </div>
         <button
-          className="m-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
           onClick={() => setIsTambahOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg"
         >
           <i className="bi bi-plus-lg"></i>
+          Add Service
         </button>
       </div>
 
-        <Card_serv />
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4" style={{ height: 'calc(100% - 80px)' }}>
+        <Card_serv key={refreshKey} />
+      </div>
 
-      {/* Modal */}
+      {/* Modal Tambah */}
       <Modal_tambah
         isOpen={isTambahOpen}
         onClose={() => setIsTambahOpen(false)}
-        onUpdated={fetchOrders}  // refresh data setelah insert
+        onUpdated={handleRefresh}
       />
     </div>
   );

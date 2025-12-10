@@ -6,28 +6,28 @@ import { supabase } from "@/lib/supabaseClient";
 
 Modal.setAppElement("body");
 
-export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
+export default function ModalEditDesign({ isOpen, onClose, design, onUpdated }) {
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const [formData, setFormData] = useState({
-        nama_layanan: "",
+        nama_bahan: "",
         deskripsi: "",
-        harga: ""
+        harga_per_unit: ""
     });
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
 
     useEffect(() => {
-        if (order) {
+        if (design) {
             setFormData({
-                nama_layanan: order.nama_layanan || "",
-                deskripsi: order.deskripsi || "",
-                harga: order.harga?.toString() || ""
+                nama_bahan: design.nama_bahan || "",
+                deskripsi: design.deskripsi || "",
+                harga_per_unit: design.harga_per_unit?.toString() || ""
             });
-            setPreview(order.gambar_url || null);
+            setPreview(design.image_url || null);
             setFile(null);
         }
-    }, [order]);
+    }, [design]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,12 +57,12 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.nama_layanan) {
-            setErrorMsg("Service name is required!");
+        if (!formData.nama_bahan) {
+            setErrorMsg("Material name is required!");
             return;
         }
 
-        if (!formData.harga) {
+        if (!formData.harga_per_unit) {
             setErrorMsg("Price is required!");
             return;
         }
@@ -71,11 +71,12 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
             setLoading(true);
             setErrorMsg("");
 
-            let imageUrl = order.gambar_url;
+            let imageUrl = design.image_url; // Keep existing image
 
+            // Upload new image if selected
             if (file) {
                 const bucket = "gambar";
-                const fileName = `layanan_${Date.now()}_${file.name}`;
+                const fileName = `bahan_${Date.now()}_${file.name}`;
 
                 const { error: uploadError } = await supabase.storage
                     .from(bucket)
@@ -95,18 +96,18 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
             }
 
             const { error } = await supabase
-                .from("m_product_layanan")
+                .from("m_bahan")
                 .update({
-                    nama_layanan: formData.nama_layanan,
+                    nama_bahan: formData.nama_bahan,
                     deskripsi: formData.deskripsi,
-                    harga: parseFloat(formData.harga),
-                    gambar_url: imageUrl
+                    harga_per_unit: parseFloat(formData.harga_per_unit),
+                    image_url: imageUrl
                 })
-                .eq("product_id", order.product_id);
+                .eq("bahan_id", design.bahan_id);
 
             if (error) throw error;
 
-            alert("Service updated successfully!");
+            alert("Material updated successfully!");
             onClose();
             if (onUpdated) onUpdated();
         } catch (err) {
@@ -116,7 +117,7 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
         }
     };
 
-    if (!order) return null;
+    if (!design) return null;
 
     return (
         <Modal
@@ -127,7 +128,7 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
         >
             <h2 className="text-xl font-semibold mb-4">
                 <i className="bi bi-pencil-square text-blue-500 mr-2"></i>
-                Edit Service
+                Edit Material
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,7 +138,7 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
                     <div
                         onDrop={handleDrop}
                         onDragOver={handleDragOver}
-                        className="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition"
+                        className="border-2 border-dashed border-gray-400 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition"
                     >
                         {preview ? (
                             <img
@@ -147,8 +148,8 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
                             />
                         ) : (
                             <div className="text-gray-500">
-                                <i className="bi bi-cloud-arrow-up text-4xl mb-2"></i>
-                                <p>Drag image here or click to select</p>
+                                <i className="bi bi-cloud-arrow-up text-3xl mb-2"></i>
+                                <p className="text-sm">Drag image here or click to select</p>
                             </div>
                         )}
                         <input
@@ -156,10 +157,10 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
                             accept="image/*"
                             onChange={handleFilePick}
                             className="hidden"
-                            id="editServiceFileInput"
+                            id="editDesignFileInput"
                         />
                         <label
-                            htmlFor="editServiceFileInput"
+                            htmlFor="editDesignFileInput"
                             className="block mt-2 text-sm text-blue-600 cursor-pointer hover:underline"
                         >
                             Choose file
@@ -169,12 +170,12 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Service Name <span className="text-red-500">*</span>
+                        Material Name <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
-                        name="nama_layanan"
-                        value={formData.nama_layanan}
+                        name="nama_bahan"
+                        value={formData.nama_bahan}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -195,12 +196,12 @@ export default function ModalEdit({ isOpen, onClose, order, onUpdated }) {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price <span className="text-red-500">*</span>
+                        Price per Unit <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="number"
-                        name="harga"
-                        value={formData.harga}
+                        name="harga_per_unit"
+                        value={formData.harga_per_unit}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />

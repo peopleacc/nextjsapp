@@ -48,7 +48,7 @@ export default function OrdProg() {
 
     useEffect(() => {
         fetchOrders();
-        
+
         // Auto-refresh setiap 3 detik untuk menampilkan pesanan dari modal_pen
         const interval = setInterval(() => {
             fetchOrders();
@@ -61,12 +61,12 @@ export default function OrdProg() {
         return <div className="p-4 text-red-600">Error: {errorMsg}</div>;
 
     if (!orders.length)
-        return <div className="p-4 text-gray-500">Tidak ada data pemesanan.</div>;
+        return <div className="p-4 text-gray-500">No order data.</div>;
 
     return (
         <div className="p-4 bg-white rounded-xl shadow-md">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Proses Orders</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Processing Orders</h2>
 
                 <button
                     onClick={fetchOrders}
@@ -96,7 +96,7 @@ export default function OrdProg() {
 
                         <div className="text-gray-800 flex gap-2">
                             <h3 className="font-semibold">
-                                {order.t_pemesanan?.m_customers?.nama || "Tanpa Nama"}
+                                {order.t_pemesanan?.m_customers?.nama || "No Name"}
                             </h3>
                             |
                             <p className="text-sm mt-1">
@@ -129,7 +129,7 @@ export default function OrdProg() {
                         </p>
 
                         <p className="text-sm text-gray-600 mt-1">
-                            Status: {order.keterangan_status || "Belum ada progress"}
+                            Status: {order.keterangan_status || "No progress yet"}
                         </p>
                     </div>
 

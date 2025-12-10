@@ -18,6 +18,12 @@ const dataside = [
   },
   {
     id: 3,
+    href: "/dashboard/design",
+    icon: "bi bi-palette",
+    name: "Material",
+  },
+  {
+    id: 4,
     href: "/dashboard/report",
     icon: "bi bi-graph-down",
     name: "Report",
@@ -30,12 +36,12 @@ const Sidebar = ({ className = "", onNavigate }) => {
   return (
     <aside className={`w-72 min-h-screen bg-[#2D336B] text-white flex flex-col transition-all duration-300 overflow-hidden shadow-2xl ${className}`}>
       <div className="relative bg-image-css px-6 py-6 border-b border-white/20 bg-gradient-to-b from-[#2D336B] to-[#1e234d] h-44">
-        
+
         {onNavigate && (
           <button
             className="lg:hidden absolute top-4 right-4 text-white/70 hover:text-white"
             onClick={onNavigate}
-            aria-label="Tutup sidebar"
+            aria-label="Close sidebar"
           >
             <i className="bi bi-x-lg text-xl"></i>
           </button>
@@ -44,17 +50,16 @@ const Sidebar = ({ className = "", onNavigate }) => {
 
       <nav className="flex flex-col space-y-3 border-t border-white/10 pt-6">
         <h2 className="px-6 text-white/60 uppercase text-xs tracking-[0.2em]">
-          Utama
+          Main
         </h2>
 
         {/* Dashboard */}
         <Link
           href="/dashboard"
           className={`px-6 py-3 flex items-center gap-3 transition rounded-r-full mr-6
-            ${
-              pathname === "/dashboard"
-                ? "bg-[#FFF2F2] text-[#2D336B] font-semibold shadow-md"
-                : "hover:bg-white/10 hover:translate-x-1"
+            ${pathname === "/dashboard"
+              ? "bg-[#FFF2F2] text-[#2D336B] font-semibold shadow-md"
+              : "hover:bg-white/10 hover:translate-x-1"
             }
           `}
           onClick={onNavigate}
@@ -65,7 +70,7 @@ const Sidebar = ({ className = "", onNavigate }) => {
 
         {/* Master Menu */}
         <h2 className="px-6 text-white/60 uppercase text-xs tracking-[0.2em]">
-          Tabel Master
+          Table
         </h2>
 
         {dataside.map((item) => {
@@ -76,10 +81,9 @@ const Sidebar = ({ className = "", onNavigate }) => {
               key={item.id}
               href={item.href}
               className={`px-6 py-3 flex items-center gap-3 transition rounded-r-full mr-6 text-base
-                ${
-                  isActive
-                    ? "bg-[#FFF2F2] text-[#2D336B] font-semibold shadow-md"
-                    : "hover:bg-white/10 hover:translate-x-1"
+                ${isActive
+                  ? "bg-[#FFF2F2] text-[#2D336B] font-semibold shadow-md"
+                  : "hover:bg-white/10 hover:translate-x-1"
                 }
               `}
               onClick={onNavigate}

@@ -43,7 +43,7 @@ export default function OrdPen() {
   }
 
   if (!orders.length) {
-    return <div className="p-4 text-gray-500">Tidak ada data pemesanan.</div>;
+    return <div className="p-4 text-gray-500">No order data.</div>;
   }
 
   return (
@@ -77,8 +77,8 @@ export default function OrdPen() {
             </div>
 
             <div className="text-gray-800 flex">
-              <h3 className="font-semibold">{order.m_customers?.nama || "Tanpa Nama"}</h3> |
-              <p className="text-xs mt-1"> + {order.m_customers?.no_hp || "Tanpa No HP"} </p>
+              <h3 className="font-semibold">{order.m_customers?.nama || "No Name"}</h3> |
+              <p className="text-xs mt-1"> + {order.m_customers?.no_hp || "No Phone"} </p>
             </div>
 
             <h2 className="text-lg font-bold text-gray-800">
