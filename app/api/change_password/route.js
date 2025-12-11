@@ -1,13 +1,11 @@
 // app/api/change_password/route.js (Next.js 13+ App Router)
 // atau pages/api/change_password.js (Next.js Pages Router)
 
+import { supabase } from "@/lib/supabaseClient";
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 export async function POST(request) {
   try {
