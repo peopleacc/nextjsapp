@@ -137,6 +137,44 @@ export default function Modal_confr({ isOpen, onClose, order, onUpdated }) {
           )}
         </div>
 
+        {/* Payment Proof Section */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            <i className="bi bi-image mr-2"></i>
+            Bukti Pembayaran
+          </label>
+
+          {order.upload_gambar ? (
+            <div className="flex flex-col items-center">
+              <div className="relative w-full max-w-[280px] rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
+                <img
+                  src={order.upload_gambar}
+                  alt="Bukti Pembayaran"
+                  className="w-full h-auto object-contain max-h-[300px] bg-white"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/image/no-image.png';
+                  }}
+                />
+              </div>
+              <a
+                href={order.upload_gambar}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+              >
+                <i className="bi bi-box-arrow-up-right"></i>
+                Lihat Gambar Asli
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+              <i className="bi bi-image text-4xl mb-2"></i>
+              <p className="text-sm">Belum ada bukti pembayaran</p>
+            </div>
+          )}
+        </div>
+
         {/* Payment Method Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">

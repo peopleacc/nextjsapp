@@ -1,8 +1,6 @@
 import nodemailer from 'nodemailer'
 import { supabase } from "@/lib/supabaseClient";
-
-
-
+import { NextResponse } from 'next/server';
 
 // Generate 6 digit OTP
 function generateOTP() {
@@ -18,23 +16,41 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-export default async function handler(req, res) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+// Helper function untuk response JSON
+function jsonResponse(data, status = 200) {
+    return NextResponse.json(data, {
+        status,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    })
+}
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end()
-    }
+// Handle OPTIONS request untuk CORS
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    })
+}
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ status: 'error', message: 'Method not allowed' })
-    }
-
-    const { action, email, otp, token, new_password } = req.body
-
+// Handle POST request
+export async function POST(request) {
     try {
+        const body = await request.json()
+        const { action, email, otp, token, new_password } = body
+
+        console.log('=== FORGOT PASSWORD REQUEST ===')
+        console.log('Action:', action)
+        console.log('Email:', email)
+        console.log('Waktu:', new Date().toISOString())
+
         // ========== ACTION 1: SEND OTP ==========
         if (action === 'send_otp') {
             // Check if email exists in m_customers table
@@ -45,10 +61,12 @@ export default async function handler(req, res) {
                 .single()
 
             if (error || !user) {
-                return res.status(404).json({
+                console.log('Email tidak ditemukan:', email)
+                return jsonResponse({
                     status: 'error',
-                    message: 'Email tidak terdaftar'
-                })
+                    message: 'Email tidak terdaftar',
+                    token: null
+                }, 404)
             }
 
             // Generate OTP
@@ -69,18 +87,20 @@ export default async function handler(req, res) {
 
             if (upsertError) {
                 console.error('Upsert error:', upsertError)
-                return res.status(500).json({
+                return jsonResponse({
                     status: 'error',
-                    message: 'Gagal menyimpan OTP'
-                })
+                    message: 'Gagal menyimpan OTP',
+                    token: null
+                }, 500)
             }
 
-            // Send email
-            await transporter.sendMail({
-                from: `"ULTIMO" <${process.env.EMAIL_USER}>`,
-                to: email,
-                subject: 'Kode OTP Reset Password - ULTIMO',
-                html: `
+            // Send email dengan logging jika gagal
+            try {
+                const emailResult = await transporter.sendMail({
+                    from: `"ULTIMO" <${process.env.EMAIL_USER}>`,
+                    to: email,
+                    subject: 'Kode OTP Reset Password - ULTIMO',
+                    html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #0D1282, #7886C7); padding: 30px; text-align: center;">
               <h1 style="color: white; margin: 0;">ULTIMO</h1>
@@ -98,12 +118,30 @@ export default async function handler(req, res) {
             </div>
           </div>
         `
-            })
+                })
 
-            return res.status(200).json({
-                status: 'success',
-                message: 'OTP telah dikirim ke email Anda'
-            })
+                console.log('Email berhasil dikirim ke:', email)
+                console.log('Message ID:', emailResult.messageId)
+
+                return jsonResponse({
+                    status: 'success',
+                    message: 'OTP telah dikirim ke email Anda',
+                    token: null
+                })
+            } catch (emailError) {
+                console.error('=== GAGAL MENGIRIM EMAIL ===')
+                console.error('Email tujuan:', email)
+                console.error('Waktu:', new Date().toISOString())
+                console.error('Error message:', emailError.message)
+                console.error('Error code:', emailError.code)
+                console.error('Full error:', emailError)
+
+                return jsonResponse({
+                    status: 'error',
+                    message: 'Gagal mengirim email OTP. Silakan coba lagi nanti.',
+                    token: null
+                }, 500)
+            }
         }
 
         // ========== ACTION 2: VERIFY OTP ==========
@@ -117,18 +155,22 @@ export default async function handler(req, res) {
                 .single()
 
             if (error || !resetData) {
-                return res.status(400).json({
+                console.log('OTP tidak valid untuk email:', email)
+                return jsonResponse({
                     status: 'error',
-                    message: 'OTP tidak valid'
-                })
+                    message: 'OTP tidak valid',
+                    token: null
+                }, 400)
             }
 
             // Check if expired
             if (new Date(resetData.expires_at) < new Date()) {
-                return res.status(400).json({
+                console.log('OTP expired untuk email:', email)
+                return jsonResponse({
                     status: 'error',
-                    message: 'OTP sudah expired. Silakan kirim ulang.'
-                })
+                    message: 'OTP sudah expired. Silakan kirim ulang.',
+                    token: null
+                }, 400)
             }
 
             // Generate reset token
@@ -140,7 +182,8 @@ export default async function handler(req, res) {
                 .update({ token: resetToken })
                 .eq('email', email)
 
-            return res.status(200).json({
+            console.log('OTP verified untuk email:', email)
+            return jsonResponse({
                 status: 'success',
                 message: 'OTP valid',
                 token: resetToken
@@ -159,24 +202,27 @@ export default async function handler(req, res) {
                 .single()
 
             if (error || !resetData) {
-                return res.status(400).json({
+                console.log('Token tidak valid untuk email:', email)
+                return jsonResponse({
                     status: 'error',
-                    message: 'Token tidak valid atau sudah digunakan'
-                })
+                    message: 'Token tidak valid atau sudah digunakan',
+                    token: null
+                }, 400)
             }
 
             // Update password di m_customers
-            // CATATAN: Sesuaikan dengan cara hash password di sistem Anda
             const { error: updateError } = await supabase
                 .from('m_customers')
                 .update({ password: new_password })
                 .eq('email', email)
 
             if (updateError) {
-                return res.status(500).json({
+                console.error('Gagal update password:', updateError)
+                return jsonResponse({
                     status: 'error',
-                    message: 'Gagal mengupdate password'
-                })
+                    message: 'Gagal mengupdate password',
+                    token: null
+                }, 500)
             }
 
             // Mark token as used
@@ -185,22 +231,29 @@ export default async function handler(req, res) {
                 .update({ used: true })
                 .eq('email', email)
 
-            return res.status(200).json({
+            console.log('Password berhasil direset untuk email:', email)
+            return jsonResponse({
                 status: 'success',
-                message: 'Password berhasil direset'
+                message: 'Password berhasil direset',
+                token: null
             })
         }
 
-        return res.status(400).json({
+        console.log('Action tidak valid:', action)
+        return jsonResponse({
             status: 'error',
-            message: 'Action tidak valid'
-        })
+            message: 'Action tidak valid',
+            token: null
+        }, 400)
 
     } catch (error) {
+        console.error('=== SERVER ERROR ===')
+        console.error('Waktu:', new Date().toISOString())
         console.error('Error:', error)
-        return res.status(500).json({
+        return jsonResponse({
             status: 'error',
-            message: 'Terjadi kesalahan server'
-        })
+            message: 'Terjadi kesalahan server',
+            token: null
+        }, 500)
     }
 }
